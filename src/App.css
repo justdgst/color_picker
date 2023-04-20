@@ -8,9 +8,9 @@ p {
   width: 120px;
 }
 .button_colors_closed {
-  height: 0px;
-  width: 0px;
-  opacity: 0;
+  height: 32px;
+  width: 120px;
+  border: 0px;
 }
 .board-row {
   width: calc(2 * 60px);

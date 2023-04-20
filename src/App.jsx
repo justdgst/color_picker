@@ -19,25 +19,30 @@ function Square({
   label,
   onSquareClick,
   isFadedByClick,
+  isSelected,
   isFadedByHovered,
   nothingToFade,
   onSquareLeave,
   onSquareEnter,
+  selectedColor,
 } = {}) {
   let className = 'square';
   let text = '';
   let disable = false;
 
-  if (isFadedByClick) {
+  if (isFadedByClick && isSelected) {
     className = 'square_blured';
     text = '';
   } else {
     className = 'square';
+    if (isSelected) {
+      text = selectedColor;
+    }
   }
   if (!nothingToFade) {
     text = label;
   }
-  if ((isFadedByHovered && !nothingToFade) || isFadedByClick) {
+  if ((isFadedByHovered && !nothingToFade) || (isFadedByClick && isSelected)) {
     className = 'square_blured';
     text = '';
     if (isFadedByClick) {
@@ -62,12 +67,17 @@ function Square({
 function Board() {
   let boardClassName = 'board-row_closed';
   let buttonClassName = 'button_colors_closed';
-  let label;
+  let labelColorsButton;
+  let choosedColor = null;
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [hoveredOverIndex, setHoveredOverIndex] = useState(null);
   const [boardOpen, setBoardOpen] = useState(false);
+  const [selectedColor, setSelectedColor] = useState(null);
   function handleClickSquare(i) {
     setSelectedIndex(i);
+    if ((choosedColor = 'A')) {
+      setSelectedColor(choosedColor);
+    }
   }
   function handleSquareLeave() {
     setHoveredOverIndex(null);
@@ -78,15 +88,25 @@ function Board() {
   function handleClickColorsButton() {
     setBoardOpen(!boardOpen);
   }
-  function handleClickSelectButton() {
+  function handleClickSelectButtonA() {
+    setBoardOpen(true);
+    setSelectedIndex(null);
+    setHoveredOverIndex(null);
+    if (selectedIndex !== null) {
+      choosedColor = 'A';
+    }
+  }
+  function handleClickSelectButtonB() {
+    setBoardOpen(true);
     setSelectedIndex(null);
     setHoveredOverIndex(null);
   }
-
   if (boardOpen === true) {
     boardClassName = 'board-row';
     buttonClassName = 'button_colors';
-    label = 'Colors X';
+    labelColorsButton = 'Colors X';
+  } else {
+    labelColorsButton = 'Colors';
   }
   const squares = Object.entries(theme.palette).map(([key, color]) => (
     <Square
@@ -94,39 +114,41 @@ function Board() {
       label={key[0].toUpperCase(0) + key.slice(1)}
       color={color}
       onSquareClick={() => handleClickSquare(key)}
-      isFadedByClick={selectedIndex && key !== selectedIndex}
+      isFadedByClick={key !== selectedIndex}
+      isSelected={selectedIndex}
       onSquareLeave={() => handleSquareLeave()}
       onSquareEnter={() => handleSquareEnter(key)}
       isFadedByHovered={key !== hoveredOverIndex}
       nothingToFade={!hoveredOverIndex}
+      selectedColor={selectedColor}
     />
   ));
+
   return (
     <div>
       <button
+        className={buttonClassName}
         onClick={() => {
           handleClickColorsButton();
         }}
       >
-        Colors
+        {labelColorsButton}
       </button>
+
       <button
-        style={{ backgroundColor: 'red' }}
-        onClick={() => handleClickSelectButton()}
+        style={{ backgroundColor: theme.palette[selectedIndex] }}
+        onClick={() => handleClickSelectButtonA()}
       >
         Select New color
       </button>
-      <div>
-        <button
-          className={buttonClassName}
-          onClick={() => {
-            handleClickColorsButton();
-          }}
-        >
-          {label}
-        </button>
-        <div className={boardClassName}>{squares}</div>
-      </div>
+      <button
+        style={{ backgroundColor: 'red' }}
+        onClick={() => handleClickSelectButtonB()}
+      >
+        Select New color
+      </button>
+
+      <div className={boardClassName}>{squares}</div>
     </div>
   );
 }
