@@ -18,36 +18,29 @@ function Square({
   color,
   label,
   onSquareClick,
-  isFadedByClick,
-  isSelected,
+  isSelectedA,
+  isSelectedB,
   isFadedByHovered,
   nothingToFade,
   onSquareLeave,
   onSquareEnter,
-  selectedColor,
 } = {}) {
   let className = 'square';
   let text = '';
   let disable = false;
 
-  if (isFadedByClick && isSelected) {
-    className = 'square_blured';
-    text = '';
-  } else {
-    className = 'square';
-    if (isSelected) {
-      text = selectedColor;
-    }
+  if (isSelectedA) {
+    text = 'A';
+  }
+  if (isSelectedB) {
+    text = 'B';
   }
   if (!nothingToFade) {
     text = label;
   }
-  if ((isFadedByHovered && !nothingToFade) || (isFadedByClick && isSelected)) {
+  if (isFadedByHovered && !nothingToFade) {
     className = 'square_blured';
     text = '';
-    if (isFadedByClick) {
-      disable = true;
-    }
   }
 
   return (
@@ -57,7 +50,6 @@ function Square({
       style={{ backgroundColor: color }}
       onMouseEnter={onSquareEnter}
       onMouseLeave={onSquareLeave}
-      disabled={disable}
     >
       {text}
     </button>
@@ -68,15 +60,17 @@ function Board() {
   let boardClassName = 'board-row_closed';
   let buttonClassName = 'button_colors_closed';
   let labelColorsButton;
-  let choosedColor = null;
-  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [selectedIndexA, setSelectedIndexA] = useState(null);
+  const [selectedIndexB, setSelectedIndexB] = useState(null);
   const [hoveredOverIndex, setHoveredOverIndex] = useState(null);
   const [boardOpen, setBoardOpen] = useState(false);
-  const [selectedColor, setSelectedColor] = useState(null);
+  const [selectedColor, setSelectedColor] = useState('A');
   function handleClickSquare(i) {
-    setSelectedIndex(i);
-    if ((choosedColor = 'A')) {
-      setSelectedColor(choosedColor);
+    console.log(selectedColor);
+    if (selectedColor === 'A') {
+      setSelectedIndexA(i);
+    } else if (selectedColor === 'B') {
+      setSelectedIndexB(i);
     }
   }
   function handleSquareLeave() {
@@ -90,21 +84,22 @@ function Board() {
   }
   function handleClickSelectButtonA() {
     setBoardOpen(true);
-    setSelectedIndex(null);
-    setHoveredOverIndex(null);
-    if (selectedIndex !== null) {
-      choosedColor = 'A';
-    }
+    setSelectedIndexA(null);
+    setSelectedColor('A');
   }
   function handleClickSelectButtonB() {
     setBoardOpen(true);
-    setSelectedIndex(null);
-    setHoveredOverIndex(null);
+    setSelectedIndexB(null);
+    setSelectedColor('B');
   }
   if (boardOpen === true) {
-    boardClassName = 'board-row';
     buttonClassName = 'button_colors';
     labelColorsButton = 'Colors X';
+    if (selectedColor === 'B') {
+      boardClassName = 'board-row_suggestion';
+    } else {
+      boardClassName = 'board-row';
+    }
   } else {
     labelColorsButton = 'Colors';
   }
@@ -114,13 +109,12 @@ function Board() {
       label={key[0].toUpperCase(0) + key.slice(1)}
       color={color}
       onSquareClick={() => handleClickSquare(key)}
-      isFadedByClick={key !== selectedIndex}
-      isSelected={selectedIndex}
+      isSelectedA={key === selectedIndexA}
+      isSelectedB={key === selectedIndexB}
       onSquareLeave={() => handleSquareLeave()}
       onSquareEnter={() => handleSquareEnter(key)}
       isFadedByHovered={key !== hoveredOverIndex}
       nothingToFade={!hoveredOverIndex}
-      selectedColor={selectedColor}
     />
   ));
 
@@ -136,16 +130,16 @@ function Board() {
       </button>
 
       <button
-        style={{ backgroundColor: theme.palette[selectedIndex] }}
+        style={{ backgroundColor: theme.palette[selectedIndexA] }}
         onClick={() => handleClickSelectButtonA()}
       >
-        Select New color
+        Color A
       </button>
       <button
-        style={{ backgroundColor: 'red' }}
+        style={{ backgroundColor: theme.palette[selectedIndexB] }}
         onClick={() => handleClickSelectButtonB()}
       >
-        Select New color
+        Color B
       </button>
 
       <div className={boardClassName}>{squares}</div>
