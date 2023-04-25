@@ -21,9 +21,11 @@ function Square({
   isSelectedA,
   isSelectedB,
   isFadedByHovered,
-  nothingToFade,
+  fadeSquare,
   onSquareLeave,
   onSquareEnter,
+  index,
+  boardClassName,
 } = {}) {
   let className = 'square';
   let text = '';
@@ -37,14 +39,22 @@ function Square({
     text = 'B';
     disable = true;
   }
-  if (!nothingToFade) {
+  if (fadeSquare) {
     text = label;
   }
-  if (isFadedByHovered && !nothingToFade) {
-    className = 'square_blured';
+  if (isFadedByHovered && fadeSquare) {
+    className = 'square square_blured';
     text = '';
   }
-
+  if (boardClassName === 'board-row_suggestion') {
+    if (index >= 0 && index <= 2) {
+      className = 'square_retresized';
+    } else if (index === 3) {
+      className = 'square_expanded';
+    } else {
+      className = 'square';
+    }
+  }
   return (
     <button
       className={className}
@@ -62,7 +72,8 @@ function Square({
 function Board() {
   let boardClassName = 'board-row_closed';
   let buttonClassName = 'button_colors_closed';
-  let buttonColorSelection = null;
+  let buttonColorSelectionA = null;
+  let buttonColorSelectionB = null;
   let labelColorsButton;
   const [selectedIndexA, setSelectedIndexA] = useState(null);
   const [selectedIndexB, setSelectedIndexB] = useState(null);
@@ -70,11 +81,12 @@ function Board() {
   const [boardOpen, setBoardOpen] = useState(false);
   const [selectedColor, setSelectedColor] = useState('A');
   function handleClickSquare(i) {
-    console.log(selectedColor);
     if (selectedColor === 'A') {
       setSelectedIndexA(i);
+      setSelectedColor('B');
     } else if (selectedColor === 'B') {
       setSelectedIndexB(i);
+      setSelectedColor(null);
     }
   }
   function handleSquareLeave() {
@@ -89,28 +101,30 @@ function Board() {
   function handleClickSelectButtonA() {
     setBoardOpen(true);
     setSelectedIndexA(null);
+    setSelectedIndexB(null);
     setSelectedColor('A');
   }
   function handleClickSelectButtonB() {
     setBoardOpen(true);
     setSelectedIndexB(null);
     setSelectedColor('B');
-    buttonColorSelection = 'button_selected';
   }
   if (boardOpen === true) {
     buttonClassName = 'button_colors';
     labelColorsButton = 'Colors X';
+    boardClassName = 'board-row';
     if (selectedColor === 'B') {
       boardClassName = 'board-row_suggestion';
-      buttonColorSelection = 'button_selected';
+      buttonColorSelectionB = 'button_selected';
     } else if (selectedColor === 'A') {
-      boardClassName = 'board-row';
-      buttonColorSelection = 'button_selected';
+      buttonColorSelectionA = 'button_selected';
     }
   } else {
     labelColorsButton = 'Colors';
   }
-  const squares = Object.entries(theme.palette).map(([key, color]) => (
+  if (selectedIndexA) {
+  }
+  const squares = Object.entries(theme.palette).map(([key, color], index) => (
     <Square
       key={key}
       label={key[0].toUpperCase(0) + key.slice(1)}
@@ -121,7 +135,9 @@ function Board() {
       onSquareLeave={() => handleSquareLeave()}
       onSquareEnter={() => handleSquareEnter(key)}
       isFadedByHovered={key !== hoveredOverIndex}
-      nothingToFade={!hoveredOverIndex}
+      fadeSquare={hoveredOverIndex}
+      index={index}
+      boardClassName={boardClassName}
     />
   ));
 
@@ -137,7 +153,7 @@ function Board() {
       </button>
 
       <button
-        className={buttonColorSelection}
+        className={buttonColorSelectionA}
         style={{
           backgroundColor: theme.palette[selectedIndexA],
           height: 32,
@@ -148,7 +164,7 @@ function Board() {
         Color A
       </button>
       <button
-        className={buttonColorSelection}
+        className={buttonColorSelectionB}
         style={{
           backgroundColor: theme.palette[selectedIndexB],
           height: 32,
