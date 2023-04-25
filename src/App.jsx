@@ -31,9 +31,11 @@ function Square({
 
   if (isSelectedA) {
     text = 'A';
+    disable = true;
   }
   if (isSelectedB) {
     text = 'B';
+    disable = true;
   }
   if (!nothingToFade) {
     text = label;
@@ -50,6 +52,7 @@ function Square({
       style={{ backgroundColor: color }}
       onMouseEnter={onSquareEnter}
       onMouseLeave={onSquareLeave}
+      disabled={disable}
     >
       {text}
     </button>
@@ -59,6 +62,7 @@ function Square({
 function Board() {
   let boardClassName = 'board-row_closed';
   let buttonClassName = 'button_colors_closed';
+  let buttonColorSelection = null;
   let labelColorsButton;
   const [selectedIndexA, setSelectedIndexA] = useState(null);
   const [selectedIndexB, setSelectedIndexB] = useState(null);
@@ -91,14 +95,17 @@ function Board() {
     setBoardOpen(true);
     setSelectedIndexB(null);
     setSelectedColor('B');
+    buttonColorSelection = 'button_selected';
   }
   if (boardOpen === true) {
     buttonClassName = 'button_colors';
     labelColorsButton = 'Colors X';
     if (selectedColor === 'B') {
       boardClassName = 'board-row_suggestion';
-    } else {
+      buttonColorSelection = 'button_selected';
+    } else if (selectedColor === 'A') {
       boardClassName = 'board-row';
+      buttonColorSelection = 'button_selected';
     }
   } else {
     labelColorsButton = 'Colors';
@@ -130,13 +137,23 @@ function Board() {
       </button>
 
       <button
-        style={{ backgroundColor: theme.palette[selectedIndexA] }}
+        className={buttonColorSelection}
+        style={{
+          backgroundColor: theme.palette[selectedIndexA],
+          height: 32,
+          width: 120,
+        }}
         onClick={() => handleClickSelectButtonA()}
       >
         Color A
       </button>
       <button
-        style={{ backgroundColor: theme.palette[selectedIndexB] }}
+        className={buttonColorSelection}
+        style={{
+          backgroundColor: theme.palette[selectedIndexB],
+          height: 32,
+          width: 120,
+        }}
         onClick={() => handleClickSelectButtonB()}
       >
         Color B
