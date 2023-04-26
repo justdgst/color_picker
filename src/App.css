@@ -7,9 +7,7 @@ p {
   height: 32px;
   width: 120px;
 }
-.button_colors_closed {
-  height: 32px;
-  width: 120px;
+.button_colors.closed {
   border: 0px;
 }
 .button_selected {
@@ -27,20 +25,9 @@ p {
   grid-auto-rows: minmax(60px, auto);
   flex-wrap: wrap;
 }
-.board-row_suggestion {
-  width: calc(2 * 60px);
-  height: 60px;
-  display: flex;
-  grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(60px, auto);
-  flex-wrap: wrap;
-}
-.board-row_closed {
+.board-row.closed {
   width: 0;
   height: 0;
-  display: grid;
-  grid-template-columns: repeat(0, 0fr);
-  grid-auto-rows: minmax(0px, auto);
   opacity: 0;
 }
 .square {
@@ -48,29 +35,26 @@ p {
   justify-content: center;
   align-items: center;
   font-size: 8px;
+  text-transform: capitalize;
   height: 60px;
   flex-basis: 50%;
+  overflow: hidden;
+  overflow-wrap: break-word;
 }
-.square_blured {
-  border: 1px solid black;
-  justify-content: center;
-  align-items: center;
+.square:disabled {
+  color: black;
+  font-weight: bold;
+  text-align: left;
+}
+.square.blured {
   font-size: 8px;
   opacity: 0.3;
 }
-.square_expanded {
-  border: 1px solid black;
-  justify-content: center;
-  align-items: center;
-  font-size: 8px;
+.square.expanded {
   flex-basis: 100%;
-  height: 60px;
+  height: 80px;
 }
-.square_retresized {
-  border: 1px solid black;
-  justify-content: center;
-  align-items: center;
-  font-size: 8px;
-  flex-basis: 33%;
+.square.minimized {
+  flex-basis: 33.33%;
   height: 40px;
 }

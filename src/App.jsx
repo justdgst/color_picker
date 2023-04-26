@@ -25,7 +25,8 @@ function Square({
   onSquareLeave,
   onSquareEnter,
   index,
-  boardClassName,
+  suggestedIndex,
+  step,
 } = {}) {
   let className = 'square';
   let text = '';
@@ -43,16 +44,20 @@ function Square({
     text = label;
   }
   if (isFadedByHovered && fadeSquare) {
-    className = 'square square_blured';
+    className = 'square blured';
     text = '';
   }
-  if (boardClassName === 'board-row_suggestion') {
-    if (index >= 0 && index <= 2) {
-      className = 'square_retresized';
-    } else if (index === 3) {
-      className = 'square_expanded';
-    } else {
-      className = 'square';
+  if (step === 'suggestion') {
+    if (index === suggestedIndex) {
+      className = 'square expanded';
+      if (isFadedByHovered && fadeSquare) {
+        className = 'square expanded blured';
+      }
+    } else if (index >= suggestedIndex - 3 && index < suggestedIndex) {
+      className = 'square minimized';
+      if (isFadedByHovered && fadeSquare) {
+        className = 'square minimized blured';
+      }
     }
   }
   return (
@@ -70,51 +75,67 @@ function Square({
 }
 
 function Board() {
-  let boardClassName = 'board-row_closed';
-  let buttonClassName = 'button_colors_closed';
-  let buttonColorSelectionA = null;
-  let buttonColorSelectionB = null;
+  let boardClassName = 'board-row closed';
+  let buttonClassName = 'button_colors closed';
+  let step = null;
+  let buttonColorSelectionA = 'button';
+  let buttonColorSelectionB = 'button';
   let labelColorsButton;
-  const [selectedIndexA, setSelectedIndexA] = useState(null);
-  const [selectedIndexB, setSelectedIndexB] = useState(null);
-  const [hoveredOverIndex, setHoveredOverIndex] = useState(null);
-  const [boardOpen, setBoardOpen] = useState(false);
+  let suggestedIndex = null;
   const [selectedColor, setSelectedColor] = useState('A');
-  function handleClickSquare(i) {
+  const [selectedColorA, setSelectedColorA] = useState(null);
+  const [selectedColorB, setSelectedColorB] = useState(null);
+  const [overColor, setOverColor] = useState(null);
+  const [boardOpen, setBoardOpen] = useState(false);
+  const [selectedIndexA, setSelectedIndexA] = useState(null);
+
+  function handleClickSquare(c, i) {
+    setOverColor(null);
     if (selectedColor === 'A') {
+      setSelectedColorA(c);
       setSelectedIndexA(i);
       setSelectedColor('B');
     } else if (selectedColor === 'B') {
-      setSelectedIndexB(i);
+      setSelectedColorB(c);
       setSelectedColor(null);
     }
   }
   function handleSquareLeave() {
-    setHoveredOverIndex(null);
+    setOverColor(null);
   }
   function handleSquareEnter(i) {
-    setHoveredOverIndex(i);
+    setOverColor(i);
   }
   function handleClickColorsButton() {
     setBoardOpen(!boardOpen);
   }
   function handleClickSelectButtonA() {
     setBoardOpen(true);
-    setSelectedIndexA(null);
-    setSelectedIndexB(null);
+    setSelectedColorA(null);
+    setSelectedColorB(null);
     setSelectedColor('A');
   }
   function handleClickSelectButtonB() {
     setBoardOpen(true);
-    setSelectedIndexB(null);
+    setSelectedColorB(null);
     setSelectedColor('B');
+  }
+  if (selectedIndexA !== null) {
+    if (selectedIndexA % 2 === 1) {
+      suggestedIndex = selectedIndexA + 4;
+    } else {
+      suggestedIndex = selectedIndexA + 3;
+    }
+    if (suggestedIndex >= Object.entries(theme.palette).length) {
+      suggestedIndex = 3;
+    }
   }
   if (boardOpen === true) {
     buttonClassName = 'button_colors';
     labelColorsButton = 'Colors X';
     boardClassName = 'board-row';
     if (selectedColor === 'B') {
-      boardClassName = 'board-row_suggestion';
+      step = 'suggestion';
       buttonColorSelectionB = 'button_selected';
     } else if (selectedColor === 'A') {
       buttonColorSelectionA = 'button_selected';
@@ -122,55 +143,50 @@ function Board() {
   } else {
     labelColorsButton = 'Colors';
   }
-  if (selectedIndexA) {
-  }
+
   const squares = Object.entries(theme.palette).map(([key, color], index) => (
     <Square
       key={key}
-      label={key[0].toUpperCase(0) + key.slice(1)}
+      label={key}
       color={color}
-      onSquareClick={() => handleClickSquare(key)}
-      isSelectedA={key === selectedIndexA}
-      isSelectedB={key === selectedIndexB}
-      onSquareLeave={() => handleSquareLeave()}
+      onSquareClick={() => handleClickSquare(key, index)}
+      isSelectedA={key === selectedColorA}
+      isSelectedB={key === selectedColorB}
+      onSquareLeave={handleSquareLeave}
       onSquareEnter={() => handleSquareEnter(key)}
-      isFadedByHovered={key !== hoveredOverIndex}
-      fadeSquare={hoveredOverIndex}
+      isFadedByHovered={key !== overColor}
+      fadeSquare={overColor}
       index={index}
-      boardClassName={boardClassName}
+      suggestedIndex={suggestedIndex}
+      step={step}
     />
   ));
 
   return (
     <div>
-      <button
-        className={buttonClassName}
-        onClick={() => {
-          handleClickColorsButton();
-        }}
-      >
+      <button className={buttonClassName} onClick={handleClickColorsButton}>
         {labelColorsButton}
       </button>
 
       <button
         className={buttonColorSelectionA}
         style={{
-          backgroundColor: theme.palette[selectedIndexA],
+          backgroundColor: theme.palette[selectedColorA],
           height: 32,
           width: 120,
         }}
-        onClick={() => handleClickSelectButtonA()}
+        onClick={handleClickSelectButtonA}
       >
         Color A
       </button>
       <button
         className={buttonColorSelectionB}
         style={{
-          backgroundColor: theme.palette[selectedIndexB],
+          backgroundColor: theme.palette[selectedColorB],
           height: 32,
           width: 120,
         }}
-        onClick={() => handleClickSelectButtonB()}
+        onClick={handleClickSelectButtonB}
       >
         Color B
       </button>
