@@ -20,7 +20,7 @@ function Square({
   onSquareClick,
   isSelectedA,
   isSelectedB,
-  isFadedByHovered,
+  isOverFaded,
   fadeSquare,
   onSquareLeave,
   onSquareEnter,
@@ -30,32 +30,29 @@ function Square({
 } = {}) {
   let className = 'square';
   let text = '';
-  let disable = false;
 
   if (isSelectedA) {
     text = 'A';
-    disable = true;
   }
   if (isSelectedB) {
     text = 'B';
-    disable = true;
   }
-  if (fadeSquare) {
+  if (fadeSquare && !isSelectedA && !isSelectedB) {
     text = label;
   }
-  if (isFadedByHovered && fadeSquare) {
+  if (isOverFaded && fadeSquare) {
     className = 'square blured';
     text = '';
   }
   if (step === 'suggestion') {
     if (index === suggestedIndex) {
       className = 'square expanded';
-      if (isFadedByHovered && fadeSquare) {
+      if (isOverFaded && fadeSquare) {
         className = 'square expanded blured';
       }
     } else if (index >= suggestedIndex - 3 && index < suggestedIndex) {
       className = 'square minimized';
-      if (isFadedByHovered && fadeSquare) {
+      if (isOverFaded && fadeSquare) {
         className = 'square minimized blured';
       }
     }
@@ -67,7 +64,6 @@ function Square({
       style={{ backgroundColor: color }}
       onMouseEnter={onSquareEnter}
       onMouseLeave={onSquareLeave}
-      disabled={disable}
     >
       {text}
     </button>
@@ -76,7 +72,7 @@ function Square({
 
 function Board() {
   let boardClassName = 'board-row closed';
-  let buttonClassName = 'button_colors closed';
+  let buttonClassName = 'closed';
   let step = null;
   let buttonColorSelectionA = 'button';
   let buttonColorSelectionB = 'button';
@@ -96,12 +92,15 @@ function Board() {
       setSelectedIndexA(i);
       setSelectedColor('B');
     } else if (selectedColor === 'B') {
-      setSelectedColorB(c);
-      setSelectedColor(null);
+      if (c !== selectedColorA) {
+        setSelectedColorB(c);
+        setSelectedColor(null);
+      }
     }
   }
   function handleSquareLeave() {
     setOverColor(null);
+    setDisabledButton(null);
   }
   function handleSquareEnter(i) {
     setOverColor(i);
@@ -131,14 +130,14 @@ function Board() {
     }
   }
   if (boardOpen === true) {
-    buttonClassName = 'button_colors';
-    labelColorsButton = 'Colors X';
     boardClassName = 'board-row';
+    labelColorsButton = 'Colors X';
+    buttonClassName = 'button';
     if (selectedColor === 'B') {
       step = 'suggestion';
-      buttonColorSelectionB = 'button_selected';
+      buttonColorSelectionB = 'selected';
     } else if (selectedColor === 'A') {
-      buttonColorSelectionA = 'button_selected';
+      buttonColorSelectionA = 'selected';
     }
   } else {
     labelColorsButton = 'Colors';
@@ -154,7 +153,7 @@ function Board() {
       isSelectedB={key === selectedColorB}
       onSquareLeave={handleSquareLeave}
       onSquareEnter={() => handleSquareEnter(key)}
-      isFadedByHovered={key !== overColor}
+      isOverFaded={key !== overColor}
       fadeSquare={overColor}
       index={index}
       suggestedIndex={suggestedIndex}
